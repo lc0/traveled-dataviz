@@ -18,7 +18,7 @@ def get_foursquare_data(foursquare_token):
     print(all_checkins)
     print("I hope we do not read this over and over")
 
-    processed = [{'country': checkin['venue']['location']['country'], 
+    processed = [{'country': checkin['venue']['location']['country'],
                   'city': checkin['venue']['location'].get('city', 'None'),
                   'lat': checkin['venue']['location']['lat'],
                   'lng': checkin['venue']['location']['lng'],
@@ -33,7 +33,7 @@ def main():
     try:
         FOURSQUARE_TOKEN = os.environ['FOURSQUARE']
     except KeyError:
-        raise ValueError("""Please provide `FOURSQUARE_TOKEN` as an environment variable. 
+        raise ValueError("""Please provide `FOURSQUARE_TOKEN` as an environment variable.
     For more details: please check the installation section of the readme file.""")
 
     st.title('🌍Places traveled')
@@ -58,7 +58,7 @@ def main():
     st.markdown("### The most East")
     st.dataframe(checkins_df.sort_values(by=['lng'], ascending=False).head(MOST_LIMIT))
 
-    
+
     checkins_df['visited_date'] = checkins_df.apply(lambda x: datetime.fromtimestamp(x['visited_at']), axis=1)
     checkins_df['year'] = checkins_df.apply(lambda x: x['visited_date'].year, axis=1)
     checkins_df['month'] = checkins_df.apply(lambda x: x['visited_date'].month, axis=1)
@@ -81,7 +81,7 @@ def main():
     )
     st.markdown("Let's see how many new countries we visited per year")
     st.altair_chart(new_countries)
-    
+
 
 
 if __name__ == "__main__":
