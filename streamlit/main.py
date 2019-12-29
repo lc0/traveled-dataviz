@@ -67,6 +67,22 @@ def compute_new_countries(dataframe) -> pd.DataFrame:
 
     return new_countries_visited
 
+
+def get_total_stats(checkins_df):
+    all_visited_places = alt.Chart(checkins_df).mark_bar().encode(
+        x=alt.X('year:N'),
+        y=alt.Y('distinct(location)', title="Distinct location"),
+        color='country',
+        tooltip=['country', 'distinct(location)']
+    )
+
+    all_checkins = alt.Chart(checkins_df).mark_line().encode(
+        x=alt.X('year:N'),
+        y=alt.Y('count()', title="Total checkins"),
+        tooltip=['count()']
+    )
+    return all_visited_places + all_checkins
+
 def get_visited_map(checkins_df, new_countries):
     from vega_datasets import data
 
@@ -141,8 +157,12 @@ def main():
     checkins_df['year'] = checkins_df.apply(lambda x: x['visited_date'].year, axis=1)
     checkins_df['month'] = checkins_df.apply(lambda x: x['visited_date'].month, axis=1)
 
+    st.markdown("### 🧮 These checkins were made in ..")
+    total_stats = get_total_stats(checkins_df)
+    st.altair_chart(total_stats)
+
     most_limit, shown_columns = sidebar_ui(checkins_df)
-    st.markdown("## The most checkins 🧭")
+    st.markdown("## 🧭 The most checkins")
     try:
         st.markdown("### The most South point")
         st.dataframe(checkins_df[shown_columns].sort_values(by=['lat']).head(most_limit))
@@ -160,10 +180,8 @@ def main():
         st.error('`lng` column is required to define the most East and West points')
 
 
-
-
     new_countries_visited = compute_new_countries(checkins_df)
-    st.markdown("## New countries visited each year 🗺")
+    st.markdown("## 🇺🇳 New countries visited each year ")
     st.dataframe(new_countries_visited[['year', 'country', 'city', 'visited_date', 'location']])
 
 
@@ -177,7 +195,7 @@ def main():
     st.markdown("Let's see how many **new** countries were visited each year")
     st.altair_chart(new_countries)
 
-    st.markdown("## Location by year - interactive map")
+    st.markdown("## 🗺 Location by year - interactive map")
     st.altair_chart(get_visited_map(checkins_df, new_countries_visited), width=0)
 
 
