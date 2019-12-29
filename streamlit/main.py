@@ -63,7 +63,7 @@ def compute_new_countries(dataframe) -> pd.DataFrame:
 
     return new_countries_visited
 
-def get_visited_map(checkins_df):
+def get_visited_map(checkins_df, new_countries):
     from vega_datasets import data
 
     vega_countries = alt.topo_feature(data.world_110m.url, 'countries')
@@ -94,21 +94,28 @@ def get_visited_map(checkins_df):
     )
 
     legend = alt.Chart(checkins_df).mark_bar().encode(
-        y=alt.Y('year:N', axis=alt.Axis(orient='right')),
+        y=alt.Y('year:N'),
         color=color
     ).add_selection(
         selection
     )
 
-    country_list = alt.Chart(checkins_df).mark_bar(
-
+    country_list = alt.Chart(checkins_df).mark_text(
     ).transform_filter(
         selection
     ).encode(
-        y='country:N',
+        y=alt.Y('country:N', title='Visited countries')
+    )
+    new_countries_list = alt.Chart(new_countries).mark_text(
+    ).transform_filter(
+        selection
+    ).transform_calculate(
+        county_and_month='datum.country + " on " + datum.visited_date'
+    ).encode(
+        y=alt.Y('county_and_month:N', title='Fist time visited ')
     )
 
-    return (base + points) | legend | country_list
+    return (base + points) | legend | country_list | new_countries_list
 
 
 def main():
@@ -160,8 +167,8 @@ def main():
     st.markdown("Let's see how many **new** countries were visited each year")
     st.altair_chart(new_countries)
 
-    st.markdown("Location by year - interactive map")
-    st.altair_chart(get_visited_map(checkins_df), width=-1)
+    st.markdown("## Location by year - interactive map")
+    st.altair_chart(get_visited_map(checkins_df, new_countries_visited), width=0)
 
 
 if __name__ == "__main__":

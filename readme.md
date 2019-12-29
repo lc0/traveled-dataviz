@@ -5,6 +5,10 @@ On the other hand, it's certainly nice to leave some space for serenity, but it 
 
 The idea of this project is to have a set of scripts that allow revisiting visually traveled destinations. As the primary matter of keeping track of these, I used Foursquare/Swarm.
 
+## Demo
+
+<p align="center"><img src="img/location_by_a_year.png"></p>
+
 ## Installation
 
 Export Foursquare token via env variable
