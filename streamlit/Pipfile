@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 streamlit = "*"
 foursquare = "*"
+vega-datasets = "*"
 
 [requires]
 python_version = "3.7"
