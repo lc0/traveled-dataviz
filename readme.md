@@ -9,6 +9,8 @@ The idea of this project is to have a set of scripts that allow revisiting visua
 
 <p align="center"><img src="img/location_by_a_year.png"></p>
 
+<p align="center"><img src="img/the_most_checkins.png"></p>
+
 ## Installation
 
 Export Foursquare token via env variable

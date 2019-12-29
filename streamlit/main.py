@@ -48,11 +48,15 @@ def get_foursquare_data(foursquare_token):
 
     return processed
 
-def sidebar_ui():
+def sidebar_ui(checkins_df):
     st.sidebar.markdown("# the most places")
     places_number = st.sidebar.slider("How many places?", min_value=1, max_value=10, value=3)
 
-    return places_number
+    shown_columns = st.sidebar.multiselect("What columns of data should be shown?",
+                                            options=list(checkins_df.columns),
+                                            default=['country', 'city', 'lng', 'lat', 'location'])
+
+    return places_number, shown_columns
 
 
 def compute_new_countries(dataframe) -> pd.DataFrame:
@@ -133,24 +137,30 @@ def main():
     st.markdown("The tracked data with Foursquare")
     st.dataframe(checkins_df)
 
-    most_limit = sidebar_ui()
-    st.markdown("## The most checkins 🧭")
-    st.markdown("### The most South point")
-    st.dataframe(checkins_df.sort_values(by=['lat']).head(most_limit))
-
-    st.markdown("### The most North point")
-    st.dataframe(checkins_df.sort_values(by=['lat'], ascending=False).head(most_limit))
-
-    st.markdown("### The most West point")
-    st.dataframe(checkins_df.sort_values(by=['lng']).head(most_limit))
-
-    st.markdown("### The most East point")
-    st.dataframe(checkins_df.sort_values(by=['lng'], ascending=False).head(most_limit))
-
-
     checkins_df['visited_date'] = checkins_df.apply(lambda x: datetime.fromtimestamp(x['visited_at']), axis=1)
     checkins_df['year'] = checkins_df.apply(lambda x: x['visited_date'].year, axis=1)
     checkins_df['month'] = checkins_df.apply(lambda x: x['visited_date'].month, axis=1)
+
+    most_limit, shown_columns = sidebar_ui(checkins_df)
+    st.markdown("## The most checkins 🧭")
+    try:
+        st.markdown("### The most South point")
+        st.dataframe(checkins_df[shown_columns].sort_values(by=['lat']).head(most_limit))
+        st.markdown("### The most North point")
+        st.dataframe(checkins_df[shown_columns].sort_values(by=['lat'], ascending=False).head(most_limit))
+    except KeyError:
+        st.error('`lat` column is required to define the most East and West points')
+
+    try:
+        st.markdown("### The most West point")
+        st.dataframe(checkins_df[shown_columns].sort_values(by=['lng']).head(most_limit))
+        st.markdown("### The most East point")
+        st.dataframe(checkins_df[shown_columns].sort_values(by=['lng'], ascending=False).head(most_limit))
+    except KeyError:
+        st.error('`lng` column is required to define the most East and West points')
+
+
+
 
     new_countries_visited = compute_new_countries(checkins_df)
     st.markdown("## New countries visited each year 🗺")
