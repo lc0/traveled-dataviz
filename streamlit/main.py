@@ -1,3 +1,4 @@
+import json
 import os
 
 import altair as alt
@@ -16,8 +17,6 @@ def get_foursquare_data(foursquare_token):
     # TODO: move it to another wrapper
     # TODO: check the lifecycle of streamlit
     cache_filename = 'foursquare.cache'
-    import os.path
-    import json
 
     if os.path.exists(cache_filename):
         print('loading from local cache')
@@ -31,9 +30,7 @@ def get_foursquare_data(foursquare_token):
 
     client = foursquare.Foursquare(access_token=foursquare_token)
     all_checkins = client.users.all_checkins()
-    # all_checkins = client.users.checkins()
 
-    print(all_checkins)
     print("I hope we do not read this over and over")
 
     processed = [{'country': checkin['venue']['location']['country'],
@@ -50,6 +47,21 @@ def get_foursquare_data(foursquare_token):
         print("Just dumped file to cache")
 
     return processed
+
+def sidebar_ui():
+    st.sidebar.markdown("# the most places")
+    places_number = st.sidebar.slider("How many places?", min_value=1, max_value=10, value=3)
+
+    return places_number
+
+
+def compute_new_countries(dataframe) -> pd.DataFrame:
+    dataframe['ones'] = 1
+    dataframe['visited_time'] = dataframe.sort_values(['visited_at'], ascending=[True]).groupby(['country'])['ones'].cumsum()
+
+    new_countries_visited = dataframe[dataframe['visited_time'] == 1]
+
+    return new_countries_visited
 
 def get_visited_map(checkins_df):
     from vega_datasets import data
@@ -68,9 +80,6 @@ def get_visited_map(checkins_df):
     base = alt.Chart(vega_countries).mark_geoshape(
         # fill='#666666',
         # stroke='white'
-    ).properties(
-        # width=800,
-        # height=800
     ).project('mercator')
 
     points = alt.Chart(checkins_df).mark_circle(
@@ -117,31 +126,27 @@ def main():
     st.markdown("The tracked data with Foursquare")
     st.dataframe(checkins_df)
 
-    MOST_LIMIT = 3
-    st.markdown("## The most checkins")
-    st.markdown("### The most South")
-    st.dataframe(checkins_df.sort_values(by=['lat']).head(MOST_LIMIT))
+    most_limit = sidebar_ui()
+    st.markdown("## The most checkins 🧭")
+    st.markdown("### The most South point")
+    st.dataframe(checkins_df.sort_values(by=['lat']).head(most_limit))
 
-    st.markdown("### The most North")
-    st.dataframe(checkins_df.sort_values(by=['lat'], ascending=False).head(MOST_LIMIT))
+    st.markdown("### The most North point")
+    st.dataframe(checkins_df.sort_values(by=['lat'], ascending=False).head(most_limit))
 
-    st.markdown("### The most West")
-    st.dataframe(checkins_df.sort_values(by=['lng']).head(MOST_LIMIT))
+    st.markdown("### The most West point")
+    st.dataframe(checkins_df.sort_values(by=['lng']).head(most_limit))
 
-    st.markdown("### The most East")
-    st.dataframe(checkins_df.sort_values(by=['lng'], ascending=False).head(MOST_LIMIT))
+    st.markdown("### The most East point")
+    st.dataframe(checkins_df.sort_values(by=['lng'], ascending=False).head(most_limit))
 
 
     checkins_df['visited_date'] = checkins_df.apply(lambda x: datetime.fromtimestamp(x['visited_at']), axis=1)
     checkins_df['year'] = checkins_df.apply(lambda x: x['visited_date'].year, axis=1)
     checkins_df['month'] = checkins_df.apply(lambda x: x['visited_date'].month, axis=1)
 
-    # TODO: move to a function
-    checkins_df['ones'] = 1
-    checkins_df['visited_time'] = checkins_df.sort_values(['visited_at'], ascending=[True]).groupby(['country'])['ones'].cumsum()
-
-    new_countries_visited = checkins_df[checkins_df['visited_time'] == 1]
-    st.markdown("### New countries visited each year")
+    new_countries_visited = compute_new_countries(checkins_df)
+    st.markdown("## New countries visited each year 🗺")
     st.dataframe(new_countries_visited[['year', 'country', 'city', 'visited_date', 'location']])
 
 
