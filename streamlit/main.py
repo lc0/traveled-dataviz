@@ -142,7 +142,7 @@ def main():
     try:
         FOURSQUARE_TOKEN = os.environ['FOURSQUARE']
     except KeyError:
-        raise ValueError("""Please provide `FOURSQUARE_TOKEN` as an environment variable.
+        raise ValueError("""Please provide `FOURSQUARE` as an environment variable.
     For more details: please check the installation section of the readme file.""")
 
     st.title('🌍Places traveled')
