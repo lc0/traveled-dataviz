@@ -13,7 +13,7 @@ The idea of this project is to have a set of scripts that allow revisiting visua
 
 ## Installation
 
-Export Foursquare token via env variable
+Export Foursquare token via env variable. The Foursquare token and API can be explored at [link](https://foursquare.com/developers/explore#req=users%2Fself)
 
 ```sh
 export FOURSQUARE=YOUR_TOKEN_HERE
