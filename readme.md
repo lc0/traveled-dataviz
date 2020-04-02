@@ -31,6 +31,13 @@ Or if executed from within the shell like Google Colab or running Jupyter
 streamlit run streamlit/main.py
 ```
 
+## Development
+The project uses [`pipenv`](https://github.com/pypa/pipenv) for dependency management
+```
+pipenv shell
+pipenv sync
+```
+
 ---
 > GitHub [@lc0](https://github.com/lc0) &nbsp;&middot;&nbsp;
 > Twitter [@lc0d3r](https://twitter.com/lc0d3r) &nbsp;&middot;&nbsp;

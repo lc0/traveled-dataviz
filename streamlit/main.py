@@ -50,7 +50,7 @@ def get_foursquare_data(foursquare_token):
 
 def sidebar_ui(checkins_df):
     st.sidebar.markdown("# the most places")
-    places_number = st.sidebar.slider("How many places?", min_value=1, max_value=10, value=3)
+    places_number = st.sidebar.slider("How many places preview?", min_value=1, max_value=10, value=3)
 
     shown_columns = st.sidebar.multiselect("What columns of data should be shown?",
                                             options=list(checkins_df.columns),
@@ -81,7 +81,8 @@ def get_total_stats(checkins_df):
         y=alt.Y('count()', title="Total checkins"),
         tooltip=['count()']
     )
-    return all_visited_places + all_checkins
+
+    return (all_visited_places + all_checkins).properties(width=700)
 
 def get_visited_map(checkins_df, new_countries):
     from vega_datasets import data
@@ -111,14 +112,14 @@ def get_visited_map(checkins_df, new_countries):
         tooltip=['city', 'country', 'year'],
         color=color,
         size=size
-    )
+    ).properties(width=400, title="wtf")
 
     legend = alt.Chart(checkins_df).mark_bar().encode(
         y=alt.Y('year:N'),
         color=color
     ).add_selection(
         selection
-    )
+    ).properties(title="works here", width=30)
 
     country_list = alt.Chart(checkins_df).mark_text(
     ).transform_filter(
@@ -126,6 +127,7 @@ def get_visited_map(checkins_df, new_countries):
     ).encode(
         y=alt.Y('country:N', title='Visited countries')
     )
+
     new_countries_list = alt.Chart(new_countries).mark_text(
     ).transform_filter(
         selection
@@ -135,7 +137,7 @@ def get_visited_map(checkins_df, new_countries):
         y=alt.Y('county_and_month:N', title='Fist time visited ')
     )
 
-    return (base + points) | legend | country_list | new_countries_list
+    return (base + points) | (legend | country_list | new_countries_list)
 
 
 def main():
@@ -191,12 +193,12 @@ def main():
         y=alt.Y('distinct(country)'),
         color='country',
         tooltip=['country', 'location']
-    )
+    ).properties(width=700)
     st.markdown("Let's see how many **new** countries were visited each year")
     st.altair_chart(new_countries)
 
     st.markdown("## 🗺 Location by year - interactive map")
-    st.altair_chart(get_visited_map(checkins_df, new_countries_visited), width=0)
+    st.altair_chart(get_visited_map(checkins_df, new_countries_visited), use_container_width=True)
 
 
 if __name__ == "__main__":
